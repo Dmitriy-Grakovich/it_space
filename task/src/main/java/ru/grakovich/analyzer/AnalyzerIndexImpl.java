@@ -1,51 +1,79 @@
 package ru.grakovich.analyzer;
 
-import java.util.Arrays;
+import java.util.*;
 
 class AnalyzerIndexImpl implements AnalyzerIndex {
 
 
     @Override
-    public int[][] transformer(String[] indexes) {
-        int[][] result = new int[indexes.length][];
-        for (int i = 0; i < indexes.length; i++) {
-            //   Arrays.stream(st.split(",")).map(x-> x.split("-"))
-            String[] temp = indexes[i].split(",");
-            int[] arr = new int[0];
+    public List<Integer[]> transformer(String[] indexes) {
+        List<Integer[]> result = new ArrayList<>();
+        for (String index : indexes) {
+            String[] temp = index.split(",");
+            Integer[] arr = new Integer[0];
             for (String s1 : temp) {
                 arr = sumArrays(arr, stringToArraysInt(s1));
             }
-            result[i] = arr;
+            result.add(arr);
         }
         return result;
     }
 
     @Override
-    public int[][] allVariants(int[][] nums) {
+    public List<Integer[]> allVariants(List<Integer[]> nums) {
+        Map<Integer, Integer[]> source = new HashMap<>();
+        for (int i = 0; i < nums.size(); i++) {
+            source.put(i, nums.get(i));
+        }
+        ListIterator<Integer> keysIterator = new ArrayList<>(source.keySet()).listIterator();
 
-        return new int[0][0];
+        Map<Integer, Integer> counter = new HashMap<>();
+
+        List<Integer[]> result = new ArrayList<>();
+        step(source, keysIterator, counter, result);
+
+        return result;
     }
 
-    private int[] stringToArraysInt(String string) {
+    private void step(Map<Integer, Integer[]> source, ListIterator<Integer> keysIterator,
+                      Map<Integer, Integer> counter, List<Integer[]> result) {
+        if (keysIterator.hasNext()) {
+            Integer key = keysIterator.next();
+            counter.put(key, 0);
+            while (counter.get(key) < source.get(key).length) {
+                step(source, keysIterator, counter, result);
+                counter.put(key, counter.get(key) + 1);
+            }
+            keysIterator.previous();
+
+        } else {
+            Integer[] variant = new Integer[source.size()];
+            for (int i = 0; i < variant.length; i++) {
+                Integer position = counter.get(i);
+                variant[i] = source.get(i)[position];
+            }
+            result.add(variant);
+
+        }
+    }
+
+
+    private Integer[] stringToArraysInt(String string) {
         int start = Character.getNumericValue(string.charAt(0));
         int end = Character.getNumericValue(string.charAt(string.length() - 1));
-        int[] result = new int[end - start + 1];
+        Integer[] result = new Integer[end - start + 1];
         for (int i = 0; i < result.length; i++) {
             result[i] = start++;
         }
         return result;
     }
 
-    private int[] sumArrays(int[] a, int[] b) {
+    private Integer[] sumArrays(Integer[] a, Integer[] b) {
         int l = a.length;
         int r = b.length;
-        int[] result = new int[l + r];
-        for (int i = 0; i < l; i++) {
-            result[i] = a[i];
-        }
-        for (int i = 0; i < r; i++) {
-            result[i + l] = b[i];
-        }
+        Integer[] result = new Integer[l + r];
+        System.arraycopy(a, 0, result, 0, l);
+        System.arraycopy(b, 0, result, l, r);
         return result;
     }
 

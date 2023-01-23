@@ -1,7 +1,9 @@
 package ru.grakovich.analyzer;
 
-public interface AnalyzerIndex {
-    int[][] transformer(String[]  indexes);
+import java.util.List;
 
-    int[][] allVariants(int[][] nums);
+public interface AnalyzerIndex {
+    List<Integer []> transformer(String[]  indexes);
+
+    List<Integer[]> allVariants(List<Integer[]> nums);
 }
